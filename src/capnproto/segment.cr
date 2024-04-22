@@ -1,4 +1,5 @@
 class CapnProto::Segment
+  getter segments : Array(CapnProto::Segment)
   getter index : UInt32 # index of this segment in the @segments array
   getter bytes : Bytes
 

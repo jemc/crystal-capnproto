@@ -75,7 +75,7 @@ struct CapnProto::Pointer::U8List
     # The 2 least significant bits (A) encode the pointer kind.
     # Return empty if this is not coded as a list pointer (kind one).
     return self.empty(segment) if (value & 0b11_u64).to_u8 != 1_u8
-    lower_u32 = (value & 0xffffffff_u64).to_u32 ^ 0b1_u32
+    lower_u32 = value.to_u32! ^ 0b1_u32
 
     # The 3 least significant bits of the upper half (C) encode the size class.
     # Return empty if this is not coded as a byte pointer.
@@ -93,14 +93,7 @@ struct CapnProto::Pointer::U8List
     # because multiplying by 4 is the same as bit shifting rightward by 2,
     # and 4 is half of the factor of 8 we need to mutiply by to translate
     # the offset from units of 8-byte words to units of bytes.
-    #
-    # We first truncate the U64 to a U32, then as a separate step,
-    # we reinterpret the unsigned U32 as a signed I32.
-    # When we add the signed offset half to the current offset, any overflow
-    # or underflow is treated as a protocol error (an invalid pointer).
-    offset_half = lower_u32 >= 0x80000000_u32 \
-      ? (lower_u32.to_i64 - 0x100000000_u64).to_i32 \
-      : lower_u32.to_i32
+    offset_half = lower_u32.to_i32!
     byte_offset = (current_offset.to_i32 + 8 + offset_half + offset_half).to_u32
     if override_byte_offset != 0xffffffff_u32
       byte_offset = override_byte_offset

@@ -181,10 +181,17 @@ struct CapnProto::Pointer::Struct
     struct_if_set(n) || CapnProto::Pointer::Struct.empty(@segment)
   end
 
-  # TODO: list_if_set
+  def list_if_set(n : UInt16) : CapnProto::Pointer::List
+    byte_offset = ptr_byte_offset(n)
+    return nil if byte_offset.nil?
+    CapnProto::Pointer::List.parse_from(
+      @segment, byte_offset, @segment.u64(byte_offset)
+    )
+  end
 
-  # TODO: list
-
+  def list(n : UInt16) : CapnProto::Pointer::List
+    list_if_set(n) || CapnProto::Pointer::List.empty(@segment)
+  end
 
   def self.parse_from(
     segment : CapnProto::Segment,

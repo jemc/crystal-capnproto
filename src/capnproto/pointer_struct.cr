@@ -61,7 +61,7 @@ struct CapnProto::Pointer::Struct
   end
 
   def f32(n : UInt32) : Float32
-    return 0 if n >= @data_word_count * 8
+    return 0.0_f32 if n >= @data_word_count * 8
     bytes = Bytes.new(
       @segment.bytes.to_unsafe + @byte_offset + n, 4, read_only: true
     )
@@ -69,7 +69,7 @@ struct CapnProto::Pointer::Struct
   end
 
   def f64(n : UInt32) : Float64
-    return 0 if n >= @data_word_count * 8
+    return 0.0_f64 if n >= @data_word_count * 8
     bytes = Bytes.new(
       @segment.bytes.to_unsafe + @byte_offset + n, 8, read_only: true
     )
@@ -141,6 +141,11 @@ struct CapnProto::Pointer::Struct
     byte.nil? ? nil : ((byte & bit_mask) != 0)
   end
 
+  def assert_union!(n : UInt32, value : UInt16) : Nil
+    raise ArgumentError.new("#{self} union at #{n} doesn't match #{value}") \
+      if !check_union(n, value)
+  end
+
   def check_union(n : UInt32, value : UInt16) : Bool
     u16(n) == value
   end
@@ -181,16 +186,16 @@ struct CapnProto::Pointer::Struct
     struct_if_set(n) || CapnProto::Pointer::Struct.empty(@segment)
   end
 
-  def list_if_set(n : UInt16) : CapnProto::Pointer::List
+  def list_if_set(n : UInt16) : CapnProto::Pointer::StructList?
     byte_offset = ptr_byte_offset(n)
     return nil if byte_offset.nil?
-    CapnProto::Pointer::List.parse_from(
+    CapnProto::Pointer::StructList.parse_from(
       @segment, byte_offset, @segment.u64(byte_offset)
     )
   end
 
-  def list(n : UInt16) : CapnProto::Pointer::List
-    list_if_set(n) || CapnProto::Pointer::List.empty(@segment)
+  def list(n : UInt16) : CapnProto::Pointer::StructList
+    list_if_set(n) || CapnProto::Pointer::StructList.empty(@segment)
   end
 
   def self.parse_from(

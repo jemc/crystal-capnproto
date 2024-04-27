@@ -1,9 +1,9 @@
 struct CapnProto::Pointer::StructList
   @segment : CapnProto::Segment
   @byte_offset : UInt32
-  @list_count : UInt32
-  @data_word_count : UInt16
-  @pointer_count : UInt16
+  getter list_count : UInt32
+  getter data_word_count : UInt16
+  getter pointer_count : UInt16
 
   def initialize(
     @segment, @byte_offset, @list_count, @data_word_count, @pointer_count
